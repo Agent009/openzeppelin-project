@@ -5,15 +5,16 @@ import { abi } from "@artifacts/contracts/MyToken.sol/MyToken.json";
 import {
   checkAddress,
   checkParameters,
-  deployerAccount,
+  deployerAccount, gasPrices,
   myTokenContractAddress,
   publicClientFor,
   walletClientFor
 } from "@scripts/utils";
+import {formatUnits} from "@node_modules/viem";
 
 async function main() {
   const contractAddress = myTokenContractAddress;
-  const [account1, account2] = await viem.getWalletClients();
+  const [account1] = await viem.getWalletClients();
   const deployer = deployerAccount || account1;
   // Fetch parameters
   const ARG_TARGET_ADDRESS_IDX = 0;
@@ -50,31 +51,79 @@ async function main() {
   })) as any[];
   console.log("scripts -> MintWithViem -> MINTER_ROLE", code);
 
-  // Validate that the contract write will execute without errors.
+  // Grant minting role
+  const { request: grantRoleRequest } = await publicClient.simulateContract({
+    account: deployer,
+    address: contractAddress,
+    abi,
+    functionName: 'grantRole',
+    args: [code, deployer.address],
+  });
+  console.log("scripts -> MintWithViem -> simulate(grantRole) -> request", grantRoleRequest);
+  let hash = await walletClient.writeContract(grantRoleRequest);
+  console.log("scripts -> MintWithViem -> transaction hash", hash, "waiting for confirmations...");
+  let receipt = await publicClient.waitForTransactionReceipt({ hash });
+  console.log("scripts -> MintWithViem -> transaction confirmed -> receipt", receipt.blockNumber);
+  gasPrices(receipt, "scripts -> MintWithViem");
+
+  // Mint
   const { request } = await publicClient.simulateContract({
-    // account: deployer, // Minting tokens with the proper Minter Role
-    account: account2!.account, // Minting tokens without role fails
+    account: deployer, // Minting tokens with the proper Minter Role
+    // account: account2!.account, // Minting tokens without role fails
     address: contractAddress,
     abi,
     functionName: 'mint',
     args: [targetAddress, mintAmount],
   });
   console.log("scripts -> MintWithViem -> simulate(mint) -> request", request);
-  // // Execute the contract
-  const hash = await walletClient.writeContract(request);
+  hash = await walletClient.writeContract(request);
   console.log("scripts -> MintWithViem -> transaction hash", hash, "waiting for confirmations...");
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
-  const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
-  const totalCost = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
+  receipt = await publicClient.waitForTransactionReceipt({ hash });
   console.log("scripts -> MintWithViem -> transaction confirmed -> receipt", receipt.blockNumber);
-  console.log("scripts -> MintWithViem -> gas -> price", gasPrice, "used", gasUsed, "totalCost", totalCost);
+  gasPrices(receipt, "scripts -> MintWithViem");
 
   if (receipt.status === "success") {
     console.log("scripts -> MintWithViem -> transaction succeeded");
   } else {
     console.error("scripts -> MintWithViem -> transaction failed");
   }
+
+  // Fetch token data concurrently
+  const [name, symbol, decimals, totalSupply] = await Promise.all([
+    publicClient.readContract({
+      address: contractAddress,
+      abi,
+      functionName: "name",
+      args: [],
+    }) as Promise<string>,
+    publicClient.readContract({
+      address: contractAddress,
+      abi,
+      functionName: "symbol",
+      args: [],
+    }) as Promise<string>,
+    publicClient.readContract({
+      address: contractAddress,
+      abi,
+      functionName: "decimals",
+      args: [],
+    }) as Promise<number>,
+    publicClient.readContract({
+      address: contractAddress,
+      abi,
+      functionName: "totalSupply",
+      args: [],
+    }) as Promise<bigint>,
+  ]);
+  console.log("scripts -> MintWithHardhat -> token data", {name, symbol, decimals, totalSupply});
+
+  const deployerBalance = (await publicClient.readContract({
+    address: contractAddress,
+    abi,
+    functionName: "balanceOf",
+    args: [deployer.address],
+  })) as bigint;
+  console.log(`Deployer balance is ${deployerBalance} decimals units, ${formatEther(deployerBalance)} ${symbol}, ${formatUnits(deployerBalance, 18)} ${symbol}`);
 }
 
 main().catch((error) => {

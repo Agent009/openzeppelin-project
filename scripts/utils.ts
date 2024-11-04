@@ -1,8 +1,8 @@
-import {viem} from "hardhat";
-import {Chain, createWalletClient, http} from "viem";
-import {privateKeyToAccount, PrivateKeyAccount} from "viem/accounts";
-import {sepolia} from "viem/chains";
-import {constants} from "@lib/constants";
+import { viem } from "hardhat";
+import { Chain, createWalletClient, http, TransactionReceipt, formatEther } from "viem";
+import { privateKeyToAccount, PrivateKeyAccount } from "viem/accounts";
+import { sepolia } from "viem/chains";
+import { constants } from "@lib/constants";
 
 export const myTokenContractAddress = constants.contracts.myToken.sepolia as `0x${string}`;
 export const deployerAccount = privateKeyToAccount(`0x${constants.account.deployerPrivateKey}`);
@@ -32,3 +32,15 @@ export const walletClientFor = (account: PrivateKeyAccount) => createWalletClien
   chain: sepolia,
   transport: http(constants.integrations.alchemy.sepolia),
 });
+
+export const gasPrices = (receipt: TransactionReceipt, consolePrepend?: string) => {
+  const gasPrice = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice) : "N/A";
+  const gasUsed = receipt.gasUsed ? receipt.gasUsed.toString() : "N/A";
+  const totalCost = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
+  console.log(`${consolePrepend} -> gas -> price`, gasPrice, "used", gasUsed, "totalCost", totalCost);
+  return {
+    gasPrice,
+    gasUsed,
+    totalCost
+  }
+}

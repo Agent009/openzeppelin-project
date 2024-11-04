@@ -1,11 +1,11 @@
-import {viem} from "hardhat";
-import {formatEther, parseEther} from "viem";
-import {sepolia} from "viem/chains";
-import {contractName} from "@artifacts/contracts/MyToken.sol/MyToken.json";
+import { viem } from "hardhat";
+import { formatEther, formatUnits, parseEther } from "viem";
+import { sepolia } from "viem/chains";
+import { contractName } from "@artifacts/contracts/MyToken.sol/MyToken.json";
 import {
   checkAddress,
   checkParameters,
-  deployerAccount,
+  deployerAccount, gasPrices,
   myTokenContractAddress,
   publicClientFor,
   walletClientFor
@@ -48,17 +48,45 @@ async function main() {
       wallet: walletClient
     }
   });
-  console.log("scripts -> MintWithHardhat -> contract", contract);
+  // console.log("scripts -> MintWithHardhat -> contract", contract);
   // @ts-expect-error ignore
   const code = await contract.read.MINTER_ROLE();
   console.log("scripts -> MintWithHardhat -> MINTER_ROLE", code);
+
+  // Grant minting role
+  // @ts-expect-error ignore
+  const roleTx = await contract.write.grantRole([
+    code,
+    deployer.address,
+  ]);
+  const roleReceipt = await publicClient.waitForTransactionReceipt({hash: roleTx});
+  console.log("scripts -> MintWithHardhat -> roleReceipt", roleReceipt);
+  gasPrices(roleReceipt, "scripts -> MintWithHardhat");
 
   // Validate that the contract write will execute without errors.
   // @ts-expect-error ignore
   const mintTx = await contract.write.mint(
     [deployer.address, mintAmount]
   );
-  await publicClient.waitForTransactionReceipt({hash: mintTx});
+  const mintReceipt = await publicClient.waitForTransactionReceipt({hash: mintTx});
+  console.log("scripts -> MintWithHardhat -> mintReceipt", mintReceipt);
+  gasPrices(mintReceipt, "scripts -> MintWithHardhat");
+
+  const [name, symbol, decimals, totalSupply] = await Promise.all([
+    // @ts-expect-error ignore
+    contract.read.name(),
+    // @ts-expect-error ignore
+    contract.read.symbol(),
+    // @ts-expect-error ignore
+    contract.read.decimals(),
+    // @ts-expect-error ignore
+    contract.read.totalSupply(),
+  ]);
+  console.log("scripts -> MintWithHardhat -> token data", {name, symbol, decimals, totalSupply});
+
+  // @ts-expect-error ignore
+  const deployerBalance: bigint = await contract.read.balanceOf([deployer.address]);
+  console.log(`Deployer balance is ${deployerBalance} decimals units, ${formatEther(deployerBalance)} ${symbol}, ${formatUnits(deployerBalance, 18)} ${symbol}`);
 }
 
 main().catch((error) => {
