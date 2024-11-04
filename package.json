@@ -11,7 +11,8 @@
     "deploy:mytoken:hh": "hardhat run scripts/MyToken/DeployWithHardhat.ts",
     "deploy:mytoken:hh:sepolia": "hardhat run scripts/MyToken/DeployWithHardhat.ts --network sepolia",
     "deploy:mytoken:viem": "ts-node -r tsconfig-paths/register --files scripts/MyToken/DeployWithViem.ts",
-    "hh:mytoken:mint": "ts-node -r tsconfig-paths/register --files scripts/MyToken/Mint.ts"
+    "mytoken:mint:hh": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithHardhat.ts",
+    "mytoken:mint:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithViem.ts"
   },
   "author": "Mohammad Amir <amir@connextar.com>",
   "license": "ISC",
