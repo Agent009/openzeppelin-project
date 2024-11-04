@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import { viem } from "hardhat";
 import { formatEther, parseEther } from "viem";
 import { sepolia } from "viem/chains";
