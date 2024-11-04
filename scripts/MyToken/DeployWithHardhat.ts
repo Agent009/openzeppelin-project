@@ -1,8 +1,9 @@
 import { viem } from "hardhat";
 import { formatEther } from "viem";
+import { publicClientFor } from "@scripts/utils";
 
 async function main() {
-  const publicClient = await viem.getPublicClient();
+  const publicClient = await publicClientFor();
   const blockNumber = await publicClient.getBlockNumber();
   console.log("scripts -> DeployWithHardhat -> last block number", blockNumber);
   const [deployer] = await viem.getWalletClients();
