@@ -9,9 +9,11 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract MyNFT is ERC721, ERC721Burnable, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    constructor(address defaultAdmin, address minter) ERC721("MyNFT", "NFT") {
-        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-        _grantRole(MINTER_ROLE, minter);
+//    constructor(address defaultAdmin, address minter) ERC721("MyNFT", "NFT") {
+    constructor() ERC721("MyNFT", "NFT") {
+//        _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+//        _grantRole(MINTER_ROLE, minter);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function safeMint(address to, uint256 tokenId) public onlyRole(MINTER_ROLE) {
