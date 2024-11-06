@@ -39,8 +39,11 @@ export const gasPrices = (receipt: TransactionReceipt, consolePrepend?: string) 
   const totalCost = receipt.effectiveGasPrice ? formatEther(receipt.effectiveGasPrice * receipt.gasUsed) : "N/A";
   console.log(`${consolePrepend} -> gas -> price`, gasPrice, "used", gasUsed, "totalCost", totalCost);
   return {
-    gasPrice,
-    gasUsed,
-    totalCost
+    display: {
+      gasPrice,
+      gasUsed,
+      totalCost
+    },
+    totalCost: receipt.effectiveGasPrice ? receipt.effectiveGasPrice * receipt.gasUsed : 0n
   }
 }
