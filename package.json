@@ -8,11 +8,12 @@
     "test": "hardhat test",
     "hh:accounts": "hardhat accounts",
     "hh:clean": "hardhat clean",
-    "deploy:mytoken:hh": "hardhat run scripts/MyToken/DeployWithHardhat.ts",
-    "deploy:mytoken:hh:sepolia": "hardhat run scripts/MyToken/DeployWithHardhat.ts --network sepolia",
-    "deploy:mytoken:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/DeployWithViem.ts",
+    "mytoken:deploy:hh": "hardhat run scripts/MyToken/DeployWithHardhat.ts",
+    "mytoken:deploy:hh:sepolia": "hardhat run scripts/MyToken/DeployWithHardhat.ts --network sepolia",
+    "mytoken:deploy:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/DeployWithViem.ts",
     "mytoken:mint:hh": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithHardhat.ts",
-    "mytoken:mint:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithViem.ts"
+    "mytoken:mint:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithViem.ts",
+    "ballottoken:deploy:test": "ts-node -r tsconfig-paths/register --files scripts/BallotToken/Test.ts"
   },
   "author": "Mohammad Amir <amir@connextar.com>",
   "license": "ISC",
