@@ -13,7 +13,8 @@
     "mytoken:deploy:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/DeployWithViem.ts",
     "mytoken:mint:hh": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithHardhat.ts",
     "mytoken:mint:vi": "ts-node -r tsconfig-paths/register --files scripts/MyToken/MintWithViem.ts",
-    "ballottoken:deploy:test": "ts-node -r tsconfig-paths/register --files scripts/BallotToken/Test.ts"
+    "ballottoken:deploy:test": "ts-node -r tsconfig-paths/register --files scripts/BallotToken/Test.ts",
+    "ballottoken:deploy": "ts-node -r tsconfig-paths/register --files scripts/BallotToken/Deploy.ts"
   },
   "author": "Mohammad Amir <amir@connextar.com>",
   "license": "ISC",
